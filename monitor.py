@@ -378,7 +378,7 @@ def analyze_video(video, transcript, config):
     )
 
     result = subprocess.run(
-        ["claude", "-p", "--disallowedTools", "*"],
+        ["claude", "-p", "--disallowedTools", "*", "--max-tokens", "4096"],
         input=prompt,
         capture_output=True,
         text=True,
