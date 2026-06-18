@@ -73,9 +73,17 @@ def fetch_new_videos(channels, seen_videos, since_days=None):
         feed_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
 
         print(f"  Checking {channel_name}...")
-        feed = feedparser.parse(feed_url)
+        feed = None
+        for attempt in range(3):
+            try:
+                feed = feedparser.parse(feed_url)
+                break
+            except Exception as e:
+                print(f"    Retry {attempt + 1}/3 for {channel_name}: {e}")
+                import time
+                time.sleep(5)
 
-        if feed.bozo and not feed.entries:
+        if feed is None or (feed.bozo and not feed.entries):
             print(f"    Warning: Could not fetch feed for {channel_name}")
             continue
 
@@ -378,7 +386,7 @@ def analyze_video(video, transcript, config):
     )
 
     result = subprocess.run(
-        ["claude", "-p", "--disallowedTools", "*", "--max-tokens", "4096"],
+        ["claude", "-p", "--disallowedTools", "*"],
         input=prompt,
         capture_output=True,
         text=True,
